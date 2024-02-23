@@ -30,6 +30,13 @@ jobs:
           clear-repository: true # to ensure correct digests
           fetch-depth: 0 # to get version
           filter: tree:0
+      - name: Install dependencies
+        run: |
+          pip3 install PyGithub boto3 unidiff
+      - name: Labels check
+        run: |
+          cd "$GITHUB_WORKSPACE/tests/ci"
+          python3 run_check.py
       - name: Python unit tests
         run: |
           cd "$GITHUB_WORKSPACE/tests/ci"
@@ -53,6 +60,8 @@ jobs:
               cat  ${{ runner.temp }}/ci_run_data.json
               echo 'EOF'
             } >> "$GITHUB_OUTPUT"
+
+            cat ${{ runner.temp }}/ci_run_data.json
       - name: Re-create GH statuses for skipped jobs if any
         run: |
             python3 "$GITHUB_WORKSPACE/tests/ci/ci.py" --infile ${{ runner.temp }}/ci_run_data.json --update-gh-statuses
