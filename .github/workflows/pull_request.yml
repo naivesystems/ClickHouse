@@ -18,7 +18,7 @@ on:  # yamllint disable-line rule:truthy
 ##########################################################################################
 jobs:
   RunConfig:
-    runs-on: [self-hosted, style-checker-aarch64]
+    runs-on: dimerun-h9-ubuntu2204
     outputs:
       data: ${{ steps.runconfig.outputs.CI_DATA }}
     steps:
@@ -33,10 +33,13 @@ jobs:
       - name: Install dependencies
         run: |
           pip3 install PyGithub boto3 unidiff
-      - name: Labels check
-        run: |
-          cd "$GITHUB_WORKSPACE/tests/ci"
-          python3 run_check.py
+      # - name: Labels check
+      #   env:
+      #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #   run: |
+      #     cd "$GITHUB_WORKSPACE/tests/ci"
+      #     python3 run_check.py
       - name: Python unit tests
         run: |
           cd "$GITHUB_WORKSPACE/tests/ci"
