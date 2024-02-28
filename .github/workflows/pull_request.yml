@@ -19,6 +19,7 @@ on:  # yamllint disable-line rule:truthy
 jobs:
   RunConfig:
     runs-on: dimerun-h9-ubuntu2204
+    environment: ci-test
     outputs:
       data: ${{ steps.runconfig.outputs.CI_DATA }}
     steps:
@@ -52,7 +53,7 @@ jobs:
       - name: PrepareRunConfig
         id: runconfig
         run: |
-            python3 "$GITHUB_WORKSPACE/tests/ci/ci.py" --configure --outfile ${{ runner.temp }}/ci_run_data.json
+            python3 "$GITHUB_WORKSPACE/tests/ci/ci.py" --configure --outfile ${{ runner.temp }}/ci_run_data.json --skip-docker
 
             echo "::group::CI configuration"
             python3 -m json.tool ${{ runner.temp }}/ci_run_data.json
