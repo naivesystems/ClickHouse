@@ -13,7 +13,8 @@ name: Build docker images
         default: false
 jobs:
   DockerBuildAarch64:
-    runs-on: [self-hosted, style-checker-aarch64]
+    runs-on: dimerun-h9-ubuntu2204
+    environment: ci-test
     if: |
       !failure() && !cancelled() && toJson(fromJson(inputs.data).docker_data.missing_aarch64) != '[]'
     steps:
@@ -21,14 +22,21 @@ jobs:
         uses: ClickHouse/checkout@v1
         with:
           ref: ${{ fromJson(inputs.data).git_ref }}
+      - name: Install dependencies
+        run: |
+          pip3 install PyGithub boto3 unidiff
       - name: Build images
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
           python3 "${GITHUB_WORKSPACE}/tests/ci/docker_images_check.py" \
             --suffix aarch64 \
             --image-tags '${{ toJson(fromJson(inputs.data).docker_data.images) }}' \
             --missing-images '${{ toJson(fromJson(inputs.data).docker_data.missing_aarch64) }}'
   DockerBuildAmd64:
-    runs-on: [self-hosted, style-checker]
+    runs-on: dimerun-h9-ubuntu2204
+    environment: ci-test
     if: |
       !failure() && !cancelled() && toJson(fromJson(inputs.data).docker_data.missing_amd64) != '[]'
     steps:
@@ -37,6 +45,9 @@ jobs:
         with:
           ref: ${{ fromJson(inputs.data).git_ref }}
       - name: Build images
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
           python3 "${GITHUB_WORKSPACE}/tests/ci/docker_images_check.py" \
             --suffix amd64 \
@@ -44,7 +55,7 @@ jobs:
             --missing-images '${{ toJson(fromJson(inputs.data).docker_data.missing_amd64) }}'
   DockerMultiArchManifest:
     needs: [DockerBuildAmd64, DockerBuildAarch64]
-    runs-on: [self-hosted, style-checker]
+    runs-on: dimerun-h9-ubuntu2204
     if: |
       !failure() && !cancelled() && (toJson(fromJson(inputs.data).docker_data.missing_multi) != '[]' || inputs.set_latest)
     steps:
